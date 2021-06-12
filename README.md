@@ -1,6 +1,4 @@
-# ABIF - Aggregated Ballot Image Format
-
-The "I" might statnd for "Inventory" or "Information".  We're still making up our mind on this subject.
+# ABIF - Aggregated Ballot Information Format
 
 See the following resources to learn more:
 
