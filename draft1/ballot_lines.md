@@ -24,13 +24,13 @@ Approval and Plurality Ballots use the Ordinal format.
 
 Commonly known as Score or Range Ballots.
 
-'/' indicates that the choice before the '/' has been assigned the score following it.
+'/' separates the choice identifier from the score.
 
 ### Weighted Ballots
 
 For Cumulative Voting.
 
-'\*' indicates that the choice before the '*' has been assigned the weight following it. This is used for Cumulative Ballots.
+'\*' indicates that the choice before the '*' has been assigned the weight following it. 
 
 ### Example Ballot Data
 ```
