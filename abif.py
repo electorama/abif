@@ -50,20 +50,16 @@ class ABIF:
 
 def main():
     """ Test function for running abif.py """
+    from os import listdir
+    from os.path import join
+    from sys import exit
 
-    fnarray = [
-        "test001.abif",
-        "test002.abif",
-        "test003.abif",
-        "test004.abif",
-        "test005.abif",
-        "test006.abif",
-        "test007.abif",
-        "test008.abif",
-        "test009.abif"
-    ]
+    fnarray = []
+    for f in listdir('testfiles'):
+        if f.endswith('abif'):
+            fnarray.append(join('testfiles', f))
 
-    for filename in fnarray:
+    for filename in sorted(fnarray):
         obj = abif.ABIF(filename)
         print("Count of " + obj.filename + " is " + str(obj.count()))
 
