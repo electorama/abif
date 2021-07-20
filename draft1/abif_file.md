@@ -12,13 +12,13 @@ Lines end with the New Line (Line Feed U+000A) \\n character.
 
 Comments and text in square brackets may be any valid utf8 characters that have a visible representation or are part of a combining sequence that produces one. White space characters except New Line and the standard space character should not be used, and should be ignored (stripped) by parsers. Control Characters, Unassigned Code Points and any others that produce no visible representation should not be present in ABIF files. It is left to the parser to decide whether to ignore Control Characters and Unassigned Code Points or to consider them fatal.
 
-ABIF is designed to permit human editing, the tools used my leave Byte Order Markers and unwanted space characters such as Line Feed \\r. Parsers for ABIF should therefore discard these characters.
+ABIF is designed to permit human editing, the tools used my leave Byte Order Markers and unwanted space characters such as Carriage Return \\r. Parsers for ABIF should therefore discard these characters.
 
-The metadata and ballot data sections of an ABIF file should only contain the characters [a-zA-Z0-9\\n _] and punctuation characters such as ':' that have defined functions within ABIF. The full utf8 character set is only permitted within comments and brackets [].
+The metadata and ballot data sections of an ABIF file should only contain the characters [a-zA-Z0-9\\n _] and punctuation characters such as ':' that have defined functions within ABIF. The full utf8 character set is only permitted within comments, brackets [], and for values within encapsulated JSON.
 
 ABIF files are organized with the metadata first followed by the ballot lines. It is recommended to keep comments with the metadata, but they may appear anywhere in the file.
 
 # Comments
 
 square brackets #5
-the meta data dictionary #14 has not defined utf versioning or character set information yet and the metadata format #6 is still open.
+the meta data dictionary #14 has not defined utf versioning or character set/ culture information yet and the metadata format #6 is still open.
