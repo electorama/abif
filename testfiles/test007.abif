@@ -1,4 +1,9 @@
 # Case 7 -Declared, bracketed candidate tokens. Ranked, no score.
+#
+# As of 2021-06-18, this test should FAIL.  The candidate declaration
+# lines at the top of this file was replaced by a new format.
+# test012.abif provides the valid syntax corresponding to the obsolete
+# syntax in test007.abif.
 
 [Doña García Márquez]: DGM
 [Steven B. Jensen]: SBJ
@@ -9,3 +14,4 @@
 26: SBJ > DGM = SY > AM
 24: SY > DGM = AM > SBJ
 23: AM > SY > DGM > SBJ
+

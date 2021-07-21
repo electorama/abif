@@ -1,4 +1,9 @@
 # Case 8 - Mixed bracketed candidate tokens. Ranked, no score. Sans whitespace.
+#
+# As of 2021-06-18, this test should FAIL.  The candidate declaration
+# lines at the top of this file was replaced by a new format.
+# test013.abif provides the valid syntax corresponding to the obsolete
+# syntax in test008.abif.
 
 [Doña García Márquez]:DGM
 [Steven B. Jensen]:SBJ
