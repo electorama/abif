@@ -1,4 +1,9 @@
 # Case 5 - Declared, bracketed candidate tokens.  Unordered scores.
+#
+# As of 2021-06-18, this test should FAIL.  The candidate declaration
+# lines at the top of this file was replaced by a new format.
+# test010.abif provides the valid syntax corresponding to the obsolete
+# syntax in test005.abif.
 
 [Doña García Márquez]: DGM
 [Steven B. Jensen]: SBJ
