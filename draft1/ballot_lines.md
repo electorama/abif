@@ -6,7 +6,7 @@ Lines of Ballot Data begin with the count of the ballot, followed by a colon. It
 
 The Ballot Count is followed by the Ballot.
 
-Optionally after the Ballot, additional extended data may be included. When the additional data is included a colon follows the ballots. The additional data is a JSON object enclosed in curly brackets {} and may not include any linebreaks, since they naturally terminate a line in ABIF. Adding Space is recommended for readability. 
+Optionally after the Ballot, additional extended data may be included. When the additional data is included a colon follows the ballots. The additional data is a JSON object enclosed in curly brackets {} and may not include any linebreaks, since they naturally terminate a line in ABIF. Adding Space is recommended for readability.
 
 ## Ballot Data
 
@@ -48,7 +48,7 @@ For Cumulative Voting.
 6: A*1,B*2,D*4
 
 # Ranked with Extended Data
-7: D>C>B>A: { "precinct":51, "county":"Bronx", "machine":2 }
+7: D>C>B>A: { "precinct":51, "county":"Bronx", "machine":"2" }
 8: C>B>A: { "precinct":11, "county":"Queens", "machine":"Mail" }
 ```
 # Comments
