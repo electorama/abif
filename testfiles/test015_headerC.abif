@@ -1,0 +1,6 @@
+ABIF 1.0 { "ballot_type": "ordinal" }
+
+27: DGM > SBJ > SY > AM
+26: SBJ > DGM = SY > AM
+24: SY > DGM = AM > SBJ
+23: AM > SY > DGM > SBJ
