@@ -1,11 +1,11 @@
-
 package Vote::ABIF;
-use Moo;
 use 5.026;
 use feature qw/signatures postderef/;
 no warnings 'experimental';
+# use utf8::all;
+# use feature 'unicode_strings';
+# binmode(STDOUT,':utf8');
 
-use namespace::clean;
 use Path::Tiny;
 # syntax compatible with new experimental try/catch feature that can be used with older perls.
 # on 5.34+ it just enables the builtin 'try' feature.
@@ -30,23 +30,9 @@ Vote::ABIF
 
 Name of file to read. Required.
 
-=cut
-
-has fileIn => (
-  is       => 'ro',
-  required => 1,
-);
-
 =head2 ballotType
 
 Sets the type of ballot to use if a valid type is not specified in metadata.
-
-=cut
-
-has ballotType => (
-  is      => 'rw',
-  default => 0,
-);
 
 =head2 ballotTypeForce
 
@@ -54,49 +40,35 @@ Ignore ballot type if present in the metadata and use the provided ballot type.
 
 =cut
 
-has ballotTypeForce => (
-  is      => 'ro',
-  default => 0,
-);
-
-has _METADATA => (
-  is      => 'rw',
-  default =>  {} ,
-);
-
-has _currentlist => (
-  is      => 'rw',
-  default => 'choices',
-);
-
-has _finished_metadata => (
-  is      => 'rw',
-  default => 0,
-);
-
-has _log => (
-  is  => 'rw',
-  isa => sub { [] },
-);
-
-sub log ( $I, $level, $message ) {
-  my $l = $I->_log();
-  push $l->@*, ( { $level, $message } );
+sub new ( $class, %args ) {
+  my $self = {};
+  $self->{'MDATA'}            = {};
+  $self->{'currentlist'}      = 'choices';
+  $self->{'MDATA'}{'choices'} = {};
+  $self->{'finishedmetadata'} = 0;
+  $self->{'DEBUG'}            = 0;
+  while ( my ( $key, $value ) = each %args ) {
+    $self->{$key} = $value;
+  }
+  return bless $self, $class;
 }
 
 my $JSON = Cpanel::JSON::XS->new;
 
 sub metadata ( $I, $key = 0, $value = '' ) {
+  warn "metadata called: key $key value $value" if $I->{'DEBUG'};
   if ($key) {
-    if ($value) { $I->{'_METADATA'}->{$key} = $value }
-    else        { return $I->{'_METADATA'}->{$key} }
+    if ($value) { $I->{'MDATA'}->{$key} = $value }
+    else        { return $I->{'MDATA'}->{$key} }
   }
   else {
-    return $I->{'_METADATA'};
+    return $I->{'MDATA'};
   }
 }
 
-sub parseABIFHead ( $I, $line ) {
+sub ballotType ($I) { return $I->{'ballotType'} }
+
+sub _parseABIFHead ( $I, $line ) {
   no warnings 'uninitialized';
   $line =~ /(?<abifver>\d+\.\d+)(?<json>.*)/;
   $I->metadata( 'version', $+{abifver} ) if $+{abifver};
@@ -107,39 +79,56 @@ sub parseABIFHead ( $I, $line ) {
 }
 
 sub _parseMetaData ( $I, $line ) {
+
+  warn "parsing: $line";
   if ( $line =~ /^\@(\w+)/ ) {    # list name directive
-    $I->_currentlist($1);
+    $I->{'currentlist'} = $1;
   }
   elsif ( $line =~ /^=/ ) {       # list item
-    $line =~ /^=\s*(\w+)\s*:\s*(.*)\s$/;
-    $I->metadata( $1, $2 );
+        # utf8::decode( $line); # perl regexes use legacy encoding
+    my ( $key, $value ) = $line =~ /^=\s*(\w+)\s*:\s*(.*)/;
+    $value =~ s/\s+$//g;
+    # utf8::encode( $value ); # back to utf8.
+    $I->{'MDATA'}{ $I->{'currentlist'} }{$key} = $value;
   }
   else {
-    $line =~ /^\s*(\w+)\s*:\s*(.*)\s$/;
+    my ( $key, $value ) = $line =~ /^\s*(\w+)\s*:\s*(.*)/;
+    $value =~ s/\s+$//g;
     $I->metadata( $1, $2 );
-   }
+  }
 }
 
 sub _validateMetaData ($I) {
-  $I->_finished_metadata(1);
+  $I->{'finishedmetadata'} = 1;
   # ...
+}
+
+sub _ordinalline( $I, $line ) {
+
+}
+
+sub _parseballots ($I, $line) {
+  $I->_ordinalline( $line ) if $I->ballotType eq 'ordinal';
 }
 
 sub parse ($I) {
   my $linectr = 1;
-  my @input   = path( $I->fileIn )->lines_utf8( { chomp => 1 } );
+  my @input   = path( $I->{'fileIn'} )->lines_utf8( { chomp => 1 } );
   if ( $input[0] =~ /^ABIF/ ) {
-    $I->parseABIFHead( shift @input );
+    $I->_parseABIFHead( shift @input );
     $linectr++;
   }
-INPUTPARSELOOP1: for my $line (@input) {
+INPUTPARSELOOP1: while (@input) {
+    my $line = shift @input;
     next INPUTPARSELOOP1 if $line =~ /^#/;    # line is a comment
     next INPUTPARSELOOP1 if $line !~ /\w/;    # line is empty
     if ( $line =~ /^\d/ ) {
-      if ( !$I->_finished_metadata ) { $I->_validateMetaData() }
+      if ( !$I->{'finishedmetadata'} ) { $I->_validateMetaData() }
       # ... parse the ballot data line
     }
-    $I->_parseMetaData($line);
+    else {
+      $I->_parseMetaData($line);
+    }
 
     $linectr++;
   }
