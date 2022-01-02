@@ -12,6 +12,8 @@ use Path::Tiny;
 use Feature::Compat::Try;
 use Cpanel::JSON::XS;
 
+use Data::Printer;
+
 =pod
 
 =head1 NAME
@@ -104,7 +106,19 @@ sub _validateMetaData ($I) {
 }
 
 sub _ordinalline( $I, $line ) {
-
+  my $res = {};
+  my $rank = -1;
+  my ( $count, $ballot ) = $line =~ /(.*):(.*)/; #split ( ':', $line) ;
+  $res->{'count'} = int $count;
+  for my $set ( split ( '>', $ballot) ) {
+    for my $equals ( split ( '=', $set) ) {
+      $equals =~ s/^\s+|\s+$//g;
+      $equals =~ s/\[|\]//g;
+      $res->{ $equals } = $rank;
+    }
+    $rank--;
+  }
+  return $res;
 }
 
 sub _parseballots ($I, $line) {
