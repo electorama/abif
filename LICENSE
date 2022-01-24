@@ -1,3 +1,31 @@
+Copyright 2021-2022 ABIF Contributors
+-------------------------------------------------------------------------------|
+The ABIF Contributors are (as of this writing in January 2022:
+* Rob Lanphier (<robla@robla.net>)
+
+Documentation in this repository is licensed under the Creative Commons 
+Attribution-ShareAlike 4.0 International License ("CC BY-SA 4.0"), found at the 
+following URL:
+  https://creativecommons.org/licenses/by-sa/4.0/
+
+Software licensed under the Apache License, Version 2.0 (the "Apache License");
+
+=============================
+Software
+-----------------
+You may not use the software in this repository except in compliance with the
+Apache License.  You may obtain a copy of the Apache License at the following
+URL:
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the Apache License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the Apache License for the specific language governing permissions and
+limitations under the Apache License.
+
+---------------------------------------
                                  Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
