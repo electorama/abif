@@ -8,12 +8,15 @@ concisely expressing the results of an ranked or rated election.
 
 import abif
 import argparse
+import os
 import re
 
 from lark import Lark, Transformer, v_args
 from lark.exceptions import UnexpectedToken, UnexpectedCharacters
 
-ABIF_GRAMMAR_FILE = 'abif.ebnf'
+ABIF_DIR = os.path.dirname(__file__)
+
+ABIF_GRAMMAR_FILE = os.path.join(ABIF_DIR, 'abif.ebnf')
 
 ABIF_WORKING_TESTS = [
     'testfiles/test001.abif',
@@ -36,7 +39,7 @@ class ABIF_Parser():
         return None
 
     def get_parser(self):
-        with open("abif.ebnf", "r") as f:
+        with open(ABIF_GRAMMAR_FILE, "r") as f:
             self.abif_grammar_bnf = f.read()
 
         self.abif_parser = Lark(self.abif_grammar_bnf).parse
