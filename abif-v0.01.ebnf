@@ -21,7 +21,7 @@ QVALUE : "\"" ("a".."z"|"A".."Z"|" "|"0".."9")+ "\""
 
 ?start: abiffile
 
-?abiffile : ( comment | json_line | cand_line | bundle_line )+
+?abiffile : ( comment | json_line | cand_line | voteline )+
 
 // comment
 comment : HASHMARK comment_string NEWLINE
@@ -37,10 +37,10 @@ cand_line : ( EQUAL? key cand_id_sep ( cand_square_quoted | key ) ) comment?
 cand_square_quoted : OPENSQ /[^\]]+/ CLOSEDSQ
 cand_id_sep : COLON
 
-// bundle_line
-bundle_line : ballot_count count_sep cand_listing comment?
+// voteline
+voteline : ballot_count count_sep cands_in_voteline comment?
 ballot_count : INTEGER
-cand_listing : ( cand_voter_pref | cand_voter_pref cand_sep cand_listing )
+cands_in_voteline : ( cands_in_voteline cand_sep cand_voter_pref | cand_voter_pref )
 cand_voter_pref : ( cand_id | cand_tok_rating )
 cand_tok_rating : cand_id SLASH rating
 cand_sep : ( "=" | ">" | "," )
