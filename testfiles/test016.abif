@@ -1,0 +1,15 @@
+# Case 16 - Bracketed candidate tokens (declared).  Ranked and scored.
+#
+# As of 2023-04-02, this test should pass, now that abif uses lark's builtin
+# token "ESCAPED_STRING".
+
+=DGM:[Doña García Márquez]
+=SBJ:[Steven B. Jensen]
+="蘇業":[Sue Ye (蘇業)]
+=AM:[Adam Muñoz]
+
+27: DGM/5 > SBJ/2 >  "蘇業"/1 > AM/0
+26: SBJ/5 > DGM/3 =  "蘇業"/3 > AM/1
+24:  "蘇業"/5 > DGM/2 =  AM/2 > SBJ/1
+23:  AM/5 >  "蘇業"/3 > DGM/1 > SBJ/0
+

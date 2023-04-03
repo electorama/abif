@@ -1,5 +1,6 @@
 %import common.WS
 %import common.NEWLINE
+%import common.ESCAPED_STRING
 %ignore WS
 
 ASTERISK : "*"
@@ -9,35 +10,36 @@ CLOSEDSQ : "]"
 CLOSEDCURLY : "}"
 COLON : ":"
 HASHMARK : "#"
-INTEGER : "0".."9"
+INTEGER : ( "0".."9" )+
 OPENCURLY : "{"
 SLASH : "/"
+QUOTATION_MARK : "\""
 
-QKEY : "\"" BKEY "\""
-BKEY : ("a".."z"|"A".."Z")+
+QKEY : (OPENSQ | QUOTATION_MARK ) BKEY (CLOSEDSQ | QUOTATION_MARK)
+BKEY : (("a".."z"|"A".."Z")+ | ESCAPED_STRING )
 QVALUE : "\"" ("a".."z"|"A".."Z"|" "|"0".."9")+ "\""
 
-?start: abifline
+?start: abiffile
 
-?abifline : ( comment | json_line | cand_line | bundle_line )+
+?abiffile : ( comment | json_line | cand_line | bundle_line )+
 
 // comment
 comment : HASHMARK comment_string NEWLINE
-comment_string : /.+/
+comment_string : /[^\r\n]+/
 
 // json_line - This is a subset of JSON that only allows for key/value pairs. 
 json_line : ( OPENCURLY [pair] CLOSEDCURLY ) comment?
 pair   : key ":" ( QVALUE | QKEY )
-key: QKEY | BKEY
+key: ( QKEY | BKEY )
 
 // cand_line
-cand_line : ( EQUAL key cand_id_sep ( cand_square_quoted | key ) ) comment?
+cand_line : ( EQUAL? key cand_id_sep ( cand_square_quoted | key ) ) comment?
 cand_square_quoted : OPENSQ /[^\]]+/ CLOSEDSQ
 cand_id_sep : COLON
 
 // bundle_line
 bundle_line : ballot_count count_sep cand_listing comment?
-ballot_count : ( INTEGER )+
+ballot_count : INTEGER
 cand_listing : ( cand_voter_pref | cand_voter_pref cand_sep cand_listing )
 cand_voter_pref : ( cand_id | cand_tok_rating )
 cand_tok_rating : cand_id SLASH rating

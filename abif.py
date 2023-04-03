@@ -12,6 +12,7 @@ import os
 import re
 
 from lark import Lark, Transformer, v_args
+
 from lark.exceptions import UnexpectedToken, UnexpectedCharacters
 
 ABIF_DIR = os.path.dirname(__file__)
@@ -30,26 +31,45 @@ ABIF_WORKING_TESTS = [
     'testfiles/test014.abif'
 ]
 
-
-class ABIF_Parser():
+class ABIF_Parser:
     """Class for parsing Aggregated Ballot Information Format (ABIF) files
     """
 
     def __init__(self):
+        self.parser = self.get_parser()
         return None
 
     def get_parser(self):
         with open(ABIF_GRAMMAR_FILE, "r") as f:
             self.abif_grammar_bnf = f.read()
 
-        self.abif_parser = Lark(self.abif_grammar_bnf).parse
+        self.abif_parser = Lark(self.abif_grammar_bnf,
+            parser="earley",
+            ambiguity="resolve").parse
 
         return self.abif_parser
 
 
-class ABIF_File:
+class ABIF_File(Transformer):
     """File with ABIF-formatted ballots
     """
+
+############### BEGIN Copied code from lark docs ########################
+#    def string(self, s):
+#        (s,) = s
+#        return s[1:-1]
+#    def number(self, n):
+#        (n,) = n
+#        return float(n)
+#
+#    list = list
+#    pair = tuple
+#    dict = dict
+#
+#    null = lambda self, _: None
+#    true = lambda self, _: True
+#    false = lambda self, _: False
+############### END Copied code from lark docs ########################
 
     def __init__(self, filename=None, verbose=False):
         """ Initialize ABIF class from file """
@@ -71,8 +91,11 @@ class ABIF_File:
         with open(self.filename) as f:
             for (i, line) in enumerate(f):
                 self.ballots.append(line)
-
         return self.filename
+
+    def transform(self):
+        pobj = self.parseobj
+        return super().transform(pobj)
 
     def count(self):
         """ Return the number of ballots represented by abif file """
@@ -81,23 +104,17 @@ class ABIF_File:
         # bundles.
 
         # Try running lark-based parser
-        try:
-            self.parse()
-        except:
-            # Presumably an invalid file
-            #
-            # FIXME: put much better exception handling, and perhaps
-            # even use the parser to perform the count.
-            return None
+        self.parse()
+
         count_retval = 0
         for (i, line) in enumerate(self.ballots):
             match = re.search(r'^(\d+)\s*[:\*]', line)
             if match:
                 thiscount = int(match.group(1))
                 count_retval += thiscount
-        self.ballots = count_retval
+        self.ballotqty = count_retval
 
-        return self.ballots
+        return self.ballotqty
 
     def _read_file(self):
         afilehandle = open(self.filename, 'r')
@@ -117,7 +134,7 @@ class ABIF_File:
 
         outstr = ""
         try:
-            parseresult_obj = lark_parser(self.file_as_string)
+            self.parseobj = lark_parser(self.file_as_string)
         except UnexpectedCharacters as err:
             self.err = str(err)
             print("ERROR (UnexpectedCharacters): " + self.filename)
@@ -138,11 +155,11 @@ class ABIF_File:
         outstr += "FILE: " + self.filename + "\n"
         outstr += "---------------\n"
         outstr += self.file_as_string
-        if(parseresult_obj):
+        if(self.parseobj):
             outstr += "================\n"
             outstr += "PARSEOUT:\n"
             outstr += "---------------\n"
-            outstr += str(parseresult_obj.pretty()) + "\n"
+            outstr += str(self.parseobj.pretty()) + "\n"
         outstr += "---------------\n"
         return outstr
 
