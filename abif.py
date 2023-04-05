@@ -54,23 +54,6 @@ class ABIF_File(Transformer):
     """File with ABIF-formatted ballots
     """
 
-############### BEGIN Copied code from lark docs ########################
-#    def string(self, s):
-#        (s,) = s
-#        return s[1:-1]
-#    def number(self, n):
-#        (n,) = n
-#        return float(n)
-#
-#    list = list
-#    pair = tuple
-#    dict = dict
-#
-#    null = lambda self, _: None
-#    true = lambda self, _: True
-#    false = lambda self, _: False
-############### END Copied code from lark docs ########################
-
     def __init__(self, filename=None, verbose=False):
         """ Initialize ABIF class from file """
         self.ballots = []
