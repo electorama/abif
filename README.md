@@ -12,4 +12,6 @@ The _Aggregated Ballot Information Format_ provides a concise, aggregated, text-
 ## Historic
 * [/r/EndFPTP - "_Standardizing Cardinal Ballot Notation_"](https://www.reddit.com/r/EndFPTP/comments/nkm2cd/standardizing_cardinal_ballot_notation/) - the May 2021 discussion on reddit where ABIF was started in earnest
 * [Rob Lanphier's first email to [EM] about ABIF](http://lists.electorama.com/pipermail/election-methods-electorama.com/2021-May/002788.html) - This was [@robla](https://github.com/robla)'s first email to [EM] about ABIF.
-* [EM-list May 2021 conversations](http://lists.electorama.com/pipermail/election-methods-electorama.com/2021-May/thread.html#2789) - the conversations in May 2021 about ABIF on the EM-list.
+* Early conversations in 2021 about ABIF on the EM-list:
+  * [EM-list May 2021 conversations](http://lists.electorama.com/pipermail/election-methods-electorama.com/2021-May/thread.html#2789)
+  * [EM-list June 2021 conversations](http://lists.electorama.com/pipermail/election-methods-electorama.com/2021-June/thread.html)
