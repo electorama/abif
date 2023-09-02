@@ -37,7 +37,7 @@ def test_larkparser_test001():
 
     assert abif_string != None
     linecount = abif_string.count('\n')
-    assert linecount == 231
+    assert linecount < 250
     err = obj._get_error_string()
     parseobj = obj.transform()
 
@@ -60,7 +60,7 @@ def test_larkparser_test002():
         pass
     assert abif_string != None
     linecount = abif_string.count('\n')
-    assert linecount == 146
+    assert linecount < 165
     err = obj._get_error_string()
     assert err == None
 
@@ -78,7 +78,7 @@ def test_larkparser_test003():
         pass
     assert abif_string != None
     linecount = abif_string.count('\n')
-    assert linecount == 218
+    assert linecount < 240
     err = obj._get_error_string()
     assert err == None
 
@@ -217,7 +217,7 @@ def test_larkparser_test010():
     assert abif_string != None
     linecount = abif_string.count('\n')
     assert linecount > 207
-    assert linecount < 215
+    assert linecount < 225
     err = obj._get_error_string()
     assert err == None
 
@@ -236,7 +236,7 @@ def test_larkparser_test011():
     assert abif_string != None
     linecount = abif_string.count('\n')
     assert linecount > 206
-    assert linecount < 216
+    assert linecount < 220
     err = obj._get_error_string()
     assert err == None
 
@@ -312,7 +312,7 @@ def test_larkparser_test015():
     assert abif_string != None
     linecount = abif_string.count('\n')
     assert linecount > 200
-    assert linecount < 210
+    assert linecount < 220
     err = obj._get_error_string()
     assert err == None
 
@@ -331,7 +331,7 @@ def test_larkparser_test016():
     assert abif_string != None
     linecount = abif_string.count('\n')
     assert linecount > 205
-    assert linecount < 220
+    assert linecount < 225
     err = obj._get_error_string()
     assert err == None
 

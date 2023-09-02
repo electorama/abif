@@ -42,10 +42,12 @@ cand_id_sep : COLON
 // voteline
 voteline : ballot_count count_sep cands_in_voteline comment?
 ballot_count : INTEGER
-cands_in_voteline : ( cands_in_voteline cand_sep cand_voter_pref | cand_voter_pref )
+?cands_in_voteline : ( cands_in_voteline cand_sep cand_voter_pref | cand_voter_pref )
 cand_voter_pref : ( cand_id | cand_tok_rating )
 cand_tok_rating : cand_id SLASH rating
-cand_sep : ( "=" | ">" | "," )
+cand_sep : ( eq | gt )
+eq : ( "=" | "," )
+gt : ">"
 rating : ("0".."9")+
 count_sep : ( COLON | ASTERISK )
 cand_id : ( cand_key | cand_square_quoted )

@@ -1,5 +1,6 @@
-20010:Carter>Anderson>Reagan
-14700:Anderson>Carter>Reagan
-5300:Anderson>Reagan>Carter
-15000:Reagan>Anderson>Carter
-5001:Reagan>Carter>Anderson
+# Fictional results from 1980 POTUS
+20010:Carter>Anderson>Reagan # Carter 1st
+14700:Anderson>Carter>Reagan # Anderson 1st
+5300:Anderson>Reagan>Carter  # Anderson 1st
+15000:Reagan>Anderson>Carter # Reagan 1st
+5001:Reagan>Carter>Anderson  # Reagan 1st
