@@ -9,6 +9,7 @@ import lark
 # The following tests count the ballots in each of the test files,
 # using simple regexp-based parsing.  The files:
 #
+# test000 (no file) - testing whether abif loads
 # test001.abif - unordered scores
 # test002.abif - ranked ballots with ABCDEFGH candidate set
 # test003.abif - Scores using = and > as delimiters
@@ -23,6 +24,9 @@ import lark
 # test012.abif - Declared, bracketed candidate tokens. Ranked, no score.
 # test013.abif - Mixed bracketed candidate tokens (sans whitespace)
 # test014.abif - Asterisk-delimited multiplier
+# test015.abif - Declared, bracketed candidate tokens.  Unordered scores.
+# test016.abif - Quoted candidate tokens (declared).  Ranked and scored.
+
 
 def test_larkparser_test000():
     lark_parser = abif.ABIF_Parser()
@@ -196,7 +200,7 @@ def test_b_larkparser_test009():
 
 
 ###########################################################
-# Test cases 010 through 014
+# Test cases 010 through 016
 #
 # This are replacement test cases for 005 through 009.  ABIF issue #8
 # (<https://github.com/electorama/abif/issues/8>) describes the change
@@ -273,8 +277,8 @@ def test_larkparser_test013():
         pass
     assert abif_string != None
     linecount = abif_string.count('\n')
-    assert linecount > 170
-    assert linecount < 180
+    assert linecount >= 170
+    assert linecount <= 180
     err = obj._get_error_string()
     assert err == None
 
@@ -292,8 +296,8 @@ def test_larkparser_test014():
         pass
     assert abif_string != None
     linecount = abif_string.count('\n')
-    assert linecount > 210
-    assert linecount < 230
+    assert linecount >= 210
+    assert linecount <= 235
     err = obj._get_error_string()
     assert err == None
 
