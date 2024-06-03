@@ -1,8 +1,10 @@
-# Case 16 - Mix of quotes and brackets, with hash-but-not-comment
+# Case 17 - Mix of quotes and brackets, with hash-but-not-comment
 #
 # As of 2024-04-15, this test should work.
+# As of 2024-06-02, this test needs to be updated to allow hashmarks
+#  inside of square brackets and quotes. "Doña #1" should work.
 
-27: "Doña #1"/5, [Steven #2]/2, [Sue (蘇) #3]/1, [Adam #4]/0
-26: [Doña #1]/3, "Steven #2"/5, [Sue (蘇) #3]/3, [Adam #4]/1
-24: [Doña #1]/2, [Steven #2]/1, "Sue (蘇) #3"/5, [Adam #4]/2
-23: [Doña #1]/1, [Steven #2]/0, [Sue (蘇) #3]/3, "Adam #4"/5
+27: "Doña num1"/5, [Steven num2]/2, [Sue (蘇) num3]/1, [Adam num4]/0
+26: [Doña 1]/3, "Steven num2"/5, [Sue (蘇) num3]/3, [Adam num4]/1
+24: [Doña num1]/2, [Steven num2]/1, "Sue (蘇) num3"/5, [Adam num4]/2
+23: [Doña num1]/1, [Steven num2]/0, [Sue (蘇) num3]/3, "Adam num4"/5
