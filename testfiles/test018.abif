@@ -1,0 +1,19 @@
+# Cast 18 - RCV/IRV tiebreaker butterfly effect
+#
+# This test file is the beginnings of a demonstration of RCV/IRV's
+# tiebreaking butterfly effect, which shows that that results in a
+# frequent number of ties in early rounds in IRV which then results in
+# ripple effects in later rounds.
+
+1:A>B>C>D>E>F
+11:B>C>D>E>F
+101:C>D>E>F
+1001:D>E>F
+10001:E>F
+100000:F
+100000:U
+10001:V>U
+1001:W>V>U
+101:X>W>V>U
+11:Y>X>W>V>U
+1:Z>Y>X>W>V>U

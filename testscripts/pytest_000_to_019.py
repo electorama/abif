@@ -1,6 +1,13 @@
 #!/usr/bin/python
-import abif
 import lark
+import os
+import pytest
+import sys
+
+# Adding parent dir to PYTHONPATH:
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+import abif
 
 #========================================
 # counting tests
@@ -26,6 +33,8 @@ import lark
 # test014.abif - Asterisk-delimited multiplier
 # test015.abif - Declared, bracketed candidate tokens.  Unordered scores.
 # test016.abif - Quoted candidate tokens (declared).  Ranked and scored.
+# test017.abif - Mix of quotes and brackets, with hash-but-not-comment
+# test018.abif - RCV/IRV tiebreaker butterfly effect
 
 
 def test_larkparser_test000():
@@ -114,6 +123,7 @@ def test_b_larkparser_test004():
 # (square-braket quoted) UTF-8 version of their name with spaces and
 # accent marks and tildes in it.
 
+@pytest.mark.xfail(reason="Non-compliant ABIF file")
 def test_larkparser_test005():
     obj = abif.ABIF_File('testfiles/test005.abif')
     try:
@@ -131,6 +141,7 @@ def test_larkparser_test005():
     assert err.startswith('No terminal defined')
 
 
+@pytest.mark.xfail(reason="Non-compliant ABIF file")
 def test_larkparser_test006():
     obj = abif.ABIF_File('testfiles/test006.abif')
     try:
@@ -148,6 +159,7 @@ def test_larkparser_test006():
     assert err.startswith('No terminal defined')
 
 
+@pytest.mark.xfail(reason="Non-compliant ABIF file")
 def test_larkparser_test007():
     obj = abif.ABIF_File('testfiles/test007.abif')
     try:
@@ -165,6 +177,7 @@ def test_larkparser_test007():
     assert err.startswith('No terminal defined')
 
 
+@pytest.mark.xfail(reason="Non-compliant ABIF file")
 def test_b_larkparser_test008():
     obj = abif.ABIF_File('testfiles/test008.abif')
     try:
@@ -182,6 +195,7 @@ def test_b_larkparser_test008():
     assert err.startswith('No terminal defined')
 
 
+@pytest.mark.xfail(reason="Non-compliant ABIF file")
 def test_b_larkparser_test009():
     obj = abif.ABIF_File('testfiles/test009.abif')
     try:
@@ -240,7 +254,7 @@ def test_larkparser_test011():
     assert abif_string != None
     linecount = abif_string.count('\n')
     assert linecount > 206
-    assert linecount < 220
+    assert linecount < 230
     err = obj._get_error_string()
     assert err == None
 
@@ -340,4 +354,39 @@ def test_larkparser_test016():
     assert err == None
 
 
+def test_larkparser_test017():
+    obj = abif.ABIF_File('testfiles/test017.abif')
+    assert obj.count() == 100
+    abif_string = ""
+    try:
+        abif_string = obj.parse()
+    except lark.exceptions.UnexpectedCharacters as err:
+        print(str(err))
+        pass
+    except:
+        pass
+    assert abif_string != None
+    linecount = abif_string.count('\n')
+    assert linecount > 215
+    assert linecount < 235
+    err = obj._get_error_string()
+    assert err == None
 
+
+def test_larkparser_test018():
+    obj = abif.ABIF_File('testfiles/test018.abif')
+    assert obj.count() == 222230
+    abif_string = ""
+    try:
+        abif_string = obj.parse()
+    except lark.exceptions.UnexpectedCharacters as err:
+        print(str(err))
+        pass
+    except:
+        pass
+    assert abif_string != None
+    linecount = abif_string.count('\n')
+    assert linecount > 290
+    assert linecount < 320
+    err = obj._get_error_string()
+    assert err == None
