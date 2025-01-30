@@ -1,0 +1,14 @@
+# Case 19 - Asterisk-delimited multiplier
+#
+# Allowing for digits in the cand_id for a candidate if the id starts
+# with an English alphabetical character.
+
+=c001:[Doña García Márquez]
+=c002:[Steven B. Jensen]
+=c003:[Sue Ye (蘇業)]
+=c004:[Adam Muñoz]
+
+27: c001/5, c002/2, c003/1, c004/0
+26: c001/3, c002/5, c003/3, c004/1
+24: c001/2, c002/1, c003/5, c004/2
+23: c001/1, c002/0, c003/3, c004/5
