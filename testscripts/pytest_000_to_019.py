@@ -297,6 +297,7 @@ def test_larkparser_test013():
     assert err == None
 
 
+@pytest.mark.xfail(reason="Non-compliant ABIF file")
 def test_larkparser_test014():
     obj = abif.ABIF_File('testfiles/test014.abif')
     assert obj.count() == 100

@@ -49,6 +49,6 @@ cand_sep : ( eq | gt )
 eq : ( "=" | "," )
 gt : ">"
 rating : ("0".."9")+
-count_sep : ( COLON | ASTERISK )
+count_sep : COLON
 cand_id : ( cand_key | cand_square_quoted )
 
