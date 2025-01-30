@@ -35,6 +35,7 @@ import abif
 # test016.abif - Quoted candidate tokens (declared).  Ranked and scored.
 # test017.abif - Mix of quotes and brackets, with hash-but-not-comment
 # test018.abif - RCV/IRV tiebreaker butterfly effect
+# test019.abif - Allowing for digits in cand_id (just not at the start)
 
 
 def test_larkparser_test000():
@@ -391,3 +392,24 @@ def test_larkparser_test018():
     assert linecount < 320
     err = obj._get_error_string()
     assert err == None
+
+# test019.abif - Allowing for digits in cand_id (just not at the start)
+def test_larkparser_test019():
+    obj = abif.ABIF_File('testfiles/test019.abif')
+    assert obj.count() == 100
+    abif_string = ""
+    try:
+        abif_string = obj.parse()
+    except lark.exceptions.UnexpectedCharacters as err:
+        print(str(err))
+        pass
+    except:
+        pass
+    assert abif_string != None
+    linecount = abif_string.count('\n')
+    assert linecount >= 210
+    assert linecount <= 235
+    err = obj._get_error_string()
+    assert err == None
+
+
