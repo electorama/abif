@@ -37,7 +37,6 @@ import abif
 # test018.abif - RCV/IRV tiebreaker butterfly effect
 # test019.abif - Allowing for digits in cand_id (just not at the start)
 
-
 def test_larkparser_test000():
     lark_parser = abif.ABIF_Parser()
     print(lark_parser)
@@ -45,7 +44,8 @@ def test_larkparser_test000():
 
 
 def test_larkparser_test001():
-    obj = abif.ABIF_File('testfiles/test001.abif')
+    testfile = 'test001.abif'
+    obj = abif.ABIF_File(f"testfiles/{testfile}")
     assert obj.count() == 24
     abif_string = obj.parse()
 
@@ -59,10 +59,9 @@ def test_larkparser_test001():
         print("LINE: ", line)
     assert err == None
 
-
 def test_larkparser_test002():
-    import lark
-    obj = abif.ABIF_File('testfiles/test002.abif')
+    testfile = 'test002.abif'
+    obj = abif.ABIF_File(f"testfiles/{testfile}")
     assert obj.count() == 24
     abif_string = ""
     try:
@@ -80,7 +79,8 @@ def test_larkparser_test002():
 
 
 def test_larkparser_test003():
-    obj = abif.ABIF_File('testfiles/test003.abif')
+    testfile = 'test003.abif'
+    obj = abif.ABIF_File(f"testfiles/{testfile}")
     assert obj.count() == 24
     abif_string = ""
     try:
@@ -98,7 +98,8 @@ def test_larkparser_test003():
 
 
 def test_b_larkparser_test004():
-    obj = abif.ABIF_File('testfiles/test004.abif') 
+    testfile = 'test004.abif'
+    obj = abif.ABIF_File(f"testfiles/{testfile}")
     assert obj.count() == 100
     abif_string = ""
     try:
@@ -124,9 +125,10 @@ def test_b_larkparser_test004():
 # (square-braket quoted) UTF-8 version of their name with spaces and
 # accent marks and tildes in it.
 
-@pytest.mark.xfail(reason="Non-compliant ABIF file")
 def test_larkparser_test005():
-    obj = abif.ABIF_File('testfiles/test005.abif')
+    testfile = 'test005.abif'
+    pytest.xfail(f"{testfile}: invalid ABIF")
+    obj = abif.ABIF_File(f"testfiles/{testfile}")
     try:
         abif_string = obj.parse()
     except lark.exceptions.UnexpectedCharacters as err:
@@ -142,9 +144,10 @@ def test_larkparser_test005():
     assert err.startswith('No terminal defined')
 
 
-@pytest.mark.xfail(reason="Non-compliant ABIF file")
 def test_larkparser_test006():
-    obj = abif.ABIF_File('testfiles/test006.abif')
+    testfile = 'test006.abif'
+    pytest.xfail(f"{testfile}: invalid ABIF")
+    obj = abif.ABIF_File(f"testfiles/{testfile}")
     try:
         abif_string = obj.parse()
     except lark.exceptions.UnexpectedCharacters as err:
@@ -160,9 +163,10 @@ def test_larkparser_test006():
     assert err.startswith('No terminal defined')
 
 
-@pytest.mark.xfail(reason="Non-compliant ABIF file")
 def test_larkparser_test007():
-    obj = abif.ABIF_File('testfiles/test007.abif')
+    testfile = 'test007.abif'
+    pytest.xfail(f"{testfile}: invalid ABIF")
+    obj = abif.ABIF_File(f"testfiles/{testfile}")
     try:
         abif_string = obj.parse()
     except lark.exceptions.UnexpectedCharacters as err:
@@ -178,9 +182,10 @@ def test_larkparser_test007():
     assert err.startswith('No terminal defined')
 
 
-@pytest.mark.xfail(reason="Non-compliant ABIF file")
 def test_b_larkparser_test008():
-    obj = abif.ABIF_File('testfiles/test008.abif')
+    testfile = 'test008.abif'
+    pytest.xfail(f"{testfile}: invalid ABIF")
+    obj = abif.ABIF_File(f"testfiles/{testfile}")
     try:
         abif_string = obj.parse()
     except lark.exceptions.UnexpectedCharacters as err:
@@ -196,9 +201,10 @@ def test_b_larkparser_test008():
     assert err.startswith('No terminal defined')
 
 
-@pytest.mark.xfail(reason="Non-compliant ABIF file")
 def test_b_larkparser_test009():
-    obj = abif.ABIF_File('testfiles/test009.abif')
+    testfile = 'test009.abif'
+    pytest.xfail(f"{testfile}: invalid ABIF")
+    obj = abif.ABIF_File(f"testfiles/{testfile}")
     try:
         abif_string = obj.parse()
     except lark.exceptions.UnexpectedCharacters as err:
@@ -223,7 +229,8 @@ def test_b_larkparser_test009():
 
 
 def test_larkparser_test010():
-    obj = abif.ABIF_File('testfiles/test010.abif')
+    testfile = 'test010.abif'
+    obj = abif.ABIF_File(f"testfiles/{testfile}")
     assert obj.count() == 100
     abif_string = ""
     try:
@@ -298,9 +305,10 @@ def test_larkparser_test013():
     assert err == None
 
 
-@pytest.mark.xfail(reason="Non-compliant ABIF file")
 def test_larkparser_test014():
-    obj = abif.ABIF_File('testfiles/test014.abif')
+    testfile = 'test014.abif'
+    pytest.xfail(f"{testfile}: invalid ABIF")
+    obj = abif.ABIF_File(f"testfiles/{testfile}")
     assert obj.count() == 100
     abif_string = ""
     try:
