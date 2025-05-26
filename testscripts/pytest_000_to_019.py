@@ -9,415 +9,220 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 import abif
 
-#========================================
-# counting tests
-# -------------------------------------
+TEST_CASES = [
+    {
+        "id": "test000_empty",
+        "file": None,  # No file, just testing parser initialization
+        "description": "Testing whether ABIF parser loads"
+    },
+    {
+        "id": "test001_isvalid",
+        "file": "test001.abif",
+        "valid": True,
+        "count": 24,
+        "min_linecount": 0,
+        "max_linecount": 250,
+        "description": "Unordered scores"
+    },
+    {
+        "id": "test002_isvalid",
+        "file": "test002.abif",
+        "valid": True,
+        "count": 24,
+        "min_linecount": 0,
+        "max_linecount": 165,
+        "description": "Ranked ballots with ABCDEFGH candidate set"
+    },
+    {
+        "id": "test003_isvalid",
+        "file": "test003.abif",
+        "valid": True,
+        "count": 24,
+        "min_linecount": 0,
+        "max_linecount": 240,
+        "description": "Scores using = and > as delimiters"
+    },
+    {
+        "id": "test004_isvalid",
+        "file": "test004.abif",
+        "valid": True,
+        "count": 100,
+        "min_linecount": 0,
+        "max_linecount": float('inf'),
+        "description": "Bracketed inlined tokens and unordered scores"
+    },
+    {
+        "id": "test005_notvalid",
+        "file": "test005.abif",
+        "valid": False,
+        "error_starts_with": "No terminal defined",
+        "description": "Declared, bracketed candidate tokens. Unordered scores."
+    },
+    {
+        "id": "test006_notvalid",
+        "file": "test006.abif",
+        "valid": False,
+        "error_starts_with": "No terminal defined",
+        "description": "Bracketed candidate tokens (declared). Ranked and scored."
+    },
+    {
+        "id": "test007_notvalid",
+        "file": "test007.abif",
+        "valid": False,
+        "error_starts_with": "No terminal defined",
+        "description": "Declared, bracketed candidate tokens. Ranked, no score."
+    },
+    {
+        "id": "test008_notvalid",
+        "file": "test008.abif",
+        "valid": False,
+        "error_starts_with": "No terminal defined",
+        "description": "Mixed bracketed candidate tokens (sans whitespace)"
+    },
+    {
+        "id": "test009_notvalid",
+        "file": "test009.abif",
+        "valid": False,
+        "error_starts_with": "No terminal defined",
+        "description": "Asterisk-delimited multiplier"
+    },
+    {
+        "id": "test010_isvalid",
+        "file": "test010.abif",
+        "valid": True,
+        "count": 100,
+        "min_linecount": 207,
+        "max_linecount": 225,
+        "description": "Declared, bracketed candidate tokens. Unordered scores."
+    },
+    {
+        "id": "test011_isvalid",
+        "file": "test011.abif",
+        "valid": True,
+        "count": 100,
+        "min_linecount": 206,
+        "max_linecount": 230,
+        "description": "Bracketed candidate tokens (declared). Ranked and scored."
+    },
+    {
+        "id": "test012_isvalid",
+        "file": "test012.abif",
+        "valid": True,
+        "count": 100,
+        "min_linecount": 156,
+        "max_linecount": 168,
+        "description": "Declared, bracketed candidate tokens. Ranked, no score."
+    },
+    {
+        "id": "test013_isvalid",
+        "file": "test013.abif",
+        "valid": True,
+        "count": 100,
+        "min_linecount": 170,
+        "max_linecount": 180,
+        "description": "Mixed bracketed candidate tokens (sans whitespace)"
+    },
+    {
+        "id": "test014_notvalid",
+        "file": "test014.abif",
+        "valid": False,
+        "count": 100,
+        "min_linecount": 210,
+        "max_linecount": 235,
+        "description": "Asterisk-delimited multiplier"
+    },
+    {
+        "id": "test015_isvalid",
+        "file": "test015.abif",
+        "valid": True,
+        "count": 100,
+        "min_linecount": 200,
+        "max_linecount": 220,
+        "description": "Declared, bracketed candidate tokens. Unordered scores."
+    },
+    {
+        "id": "test016_isvalid",
+        "file": "test016.abif",
+        "valid": True,
+        "count": 100,
+        "min_linecount": 205,
+        "max_linecount": 225,
+        "description": "Quoted candidate tokens (declared). Ranked and scored."
+    },
+    {
+        "id": "test017_isvalid",
+        "file": "test017.abif",
+        "valid": True,
+        "count": 100,
+        "min_linecount": 215,
+        "max_linecount": 235,
+        "description": "Mix of quotes and brackets, with hash-but-not-comment"
+    },
+    {
+        "id": "test018_isvalid",
+        "file": "test018.abif",
+        "valid": True,
+        "count": 222230,
+        "min_linecount": 290,
+        "max_linecount": 320,
+        "description": "RCV/IRV tiebreaker butterfly effect"
+    },
+    {
+        "id": "test019_isvalid",
+        "file": "test019.abif",
+        "valid": True,
+        "count": 100,
+        "min_linecount": 210,
+        "max_linecount": 235,
+        "description": "Allowing for digits in cand_id (just not at the start)"
+    }
+]
 
-# The following tests count the ballots in each of the test files,
-# using simple regexp-based parsing.  The files:
-#
-# test000 (no file) - testing whether abif loads
-# test001.abif - unordered scores
-# test002.abif - ranked ballots with ABCDEFGH candidate set
-# test003.abif - Scores using = and > as delimiters
-# test004.abif - bracketed inlined tokens and unordered scores
-# test005.abif - Declared, bracketed candidate tokens.  Unordered scores.
-# test006.abif - Bracketed candidate tokens (declared).  Ranked and scored.
-# test007.abif - Declared, bracketed candidate tokens. Ranked, no score.
-# test008.abif - Mixed bracketed candidate tokens (sans whitespace)
-# test009.abif - Asterisk-delimited multiplier
-# test010.abif - Declared, bracketed candidate tokens.  Unordered scores.
-# test011.abif - Bracketed candidate tokens (declared).  Ranked and scored.
-# test012.abif - Declared, bracketed candidate tokens. Ranked, no score.
-# test013.abif - Mixed bracketed candidate tokens (sans whitespace)
-# test014.abif - Asterisk-delimited multiplier
-# test015.abif - Declared, bracketed candidate tokens.  Unordered scores.
-# test016.abif - Quoted candidate tokens (declared).  Ranked and scored.
-# test017.abif - Mix of quotes and brackets, with hash-but-not-comment
-# test018.abif - RCV/IRV tiebreaker butterfly effect
-# test019.abif - Allowing for digits in cand_id (just not at the start)
 
-def test_larkparser_test000():
+@pytest.mark.parametrize("test_case", TEST_CASES, ids=[t["id"] for t in TEST_CASES])
+def test_abif_file(test_case, request):
+    """Test an ABIF file."""
     lark_parser = abif.ABIF_Parser()
-    print(lark_parser)
     assert lark_parser != None
 
+    # If there's no file given, just assume this is an initialization test
+    if test_case["file"] == None:
+        return
 
-def test_larkparser_test001():
-    testfile = 'test001.abif'
-    obj = abif.ABIF_File(f"testfiles/{testfile}")
-    assert obj.count() == 24
-    abif_string = obj.parse()
+    # XFAIL all of the invalid ABIF files
+    if not test_case.get('valid'):
+        pytest.xfail(f"{test_case['file']}: invalid ABIF")
 
-    assert abif_string != None
+    # Pass ABIF testfile into Lark-based parser
+    testfile = test_case["file"]
+    larkobj = abif.ABIF_File(f"testfiles/{testfile}")
+
+    # Check ballot count
+    if "count" in test_case:
+        assert larkobj.count() == test_case["count"]
+
+    # Pull parsed ABIF string into a buffer
+    abif_string = larkobj.parse()
+
+    # Check linecount against min_linecount and max_linecount
     linecount = abif_string.count('\n')
-    assert linecount < 250
-    err = obj._get_error_string()
-    parseobj = obj.transform()
-
-    for line in parseobj.children:
-        print("LINE: ", line)
-    assert err == None
-
-def test_larkparser_test002():
-    testfile = 'test002.abif'
-    obj = abif.ABIF_File(f"testfiles/{testfile}")
-    assert obj.count() == 24
-    abif_string = ""
-    try:
-        abif_string = obj.parse()
-    except lark.exceptions.UnexpectedCharacters as err:
-        print(str(err))
-        pass
-    except:
-        pass
-    assert abif_string != None
-    linecount = abif_string.count('\n')
-    assert linecount < 165
-    err = obj._get_error_string()
-    assert err == None
-
-
-def test_larkparser_test003():
-    testfile = 'test003.abif'
-    obj = abif.ABIF_File(f"testfiles/{testfile}")
-    assert obj.count() == 24
-    abif_string = ""
-    try:
-        abif_string = obj.parse()
-    except lark.exceptions.UnexpectedCharacters as err:
-        print(str(err))
-        pass
-    except:
-        pass
-    assert abif_string != None
-    linecount = abif_string.count('\n')
-    assert linecount < 240
-    err = obj._get_error_string()
-    assert err == None
-
-
-def test_b_larkparser_test004():
-    testfile = 'test004.abif'
-    obj = abif.ABIF_File(f"testfiles/{testfile}")
-    assert obj.count() == 100
-    abif_string = ""
-    try:
-        abif_string = obj.parse()
-    except lark.exceptions.UnexpectedCharacters as err:
-        print(str(err))
-        pass
-    except:
-        pass
-    assert abif_string != None
-    print("TEST 004 abif_string len: ", len(abif_string))
-    linecount = abif_string.count('\n')
-    err = obj._get_error_string()
-    assert err == None
-
-
-#############################################################
-# THROWING EXCEPTIONS ON PURPOSE
-#
-# test005.abif through test009.abif should raise assertions, because
-# they were written before we agreed that candidate id declaration
-# lines should start with "=", then the id, and *then* the "squoted"
-# (square-braket quoted) UTF-8 version of their name with spaces and
-# accent marks and tildes in it.
-
-def test_larkparser_test005():
-    testfile = 'test005.abif'
-    pytest.xfail(f"{testfile}: invalid ABIF")
-    obj = abif.ABIF_File(f"testfiles/{testfile}")
-    try:
-        abif_string = obj.parse()
-    except lark.exceptions.UnexpectedCharacters as err:
-        abif_string = "FAIL"
-        print(str(err))
-        pass
-    except:
-        pass
-    assert abif_string != None
-    linecount = abif_string.count('\n')
-    assert linecount == 0
-    err = obj._get_error_string()
-    assert err.startswith('No terminal defined')
-
-
-def test_larkparser_test006():
-    testfile = 'test006.abif'
-    pytest.xfail(f"{testfile}: invalid ABIF")
-    obj = abif.ABIF_File(f"testfiles/{testfile}")
-    try:
-        abif_string = obj.parse()
-    except lark.exceptions.UnexpectedCharacters as err:
-        abif_string = "FAIL"
-        print(str(err))
-        pass
-    except:
-        pass
-    assert abif_string != None
-    linecount = abif_string.count('\n')
-    assert linecount == 0
-    err = obj._get_error_string()
-    assert err.startswith('No terminal defined')
-
-
-def test_larkparser_test007():
-    testfile = 'test007.abif'
-    pytest.xfail(f"{testfile}: invalid ABIF")
-    obj = abif.ABIF_File(f"testfiles/{testfile}")
-    try:
-        abif_string = obj.parse()
-    except lark.exceptions.UnexpectedCharacters as err:
-        abif_string = "FAIL"
-        print(str(err))
-        pass
-    except:
-        pass
-    assert abif_string != None
-    linecount = abif_string.count('\n')
-    assert linecount == 0
-    err = obj._get_error_string()
-    assert err.startswith('No terminal defined')
-
-
-def test_b_larkparser_test008():
-    testfile = 'test008.abif'
-    pytest.xfail(f"{testfile}: invalid ABIF")
-    obj = abif.ABIF_File(f"testfiles/{testfile}")
-    try:
-        abif_string = obj.parse()
-    except lark.exceptions.UnexpectedCharacters as err:
-        abif_string = "FAIL"
-        print(str(err))
-        pass
-    except:
-        pass
-    assert abif_string != None
-    linecount = abif_string.count('\n')
-    assert linecount == 0
-    err = obj._get_error_string()
-    assert err.startswith('No terminal defined')
-
-
-def test_b_larkparser_test009():
-    testfile = 'test009.abif'
-    pytest.xfail(f"{testfile}: invalid ABIF")
-    obj = abif.ABIF_File(f"testfiles/{testfile}")
-    try:
-        abif_string = obj.parse()
-    except lark.exceptions.UnexpectedCharacters as err:
-        abif_string = "FAIL"
-        print(str(err))
-        pass
-    except:
-        pass
-    assert abif_string != None
-    linecount = abif_string.count('\n')
-    assert linecount == 0
-    err = obj._get_error_string()
-    assert err.startswith('No terminal defined')
-
-
-###########################################################
-# Test cases 010 through 016
-#
-# This are replacement test cases for 005 through 009.  ABIF issue #8
-# (<https://github.com/electorama/abif/issues/8>) describes the change
-# in syntax.
-
-
-def test_larkparser_test010():
-    testfile = 'test010.abif'
-    obj = abif.ABIF_File(f"testfiles/{testfile}")
-    assert obj.count() == 100
-    abif_string = ""
-    try:
-        abif_string = obj.parse()
-    except lark.exceptions.UnexpectedCharacters as err:
-        print(str(err))
-        pass
-    except:
-        pass
-    assert abif_string != None
-    linecount = abif_string.count('\n')
-    assert linecount > 207
-    assert linecount < 225
-    err = obj._get_error_string()
-    assert err == None
-
-
-def test_larkparser_test011():
-    obj = abif.ABIF_File('testfiles/test011.abif')
-    assert obj.count() == 100
-    abif_string = ""
-    try:
-        abif_string = obj.parse()
-    except lark.exceptions.UnexpectedCharacters as err:
-        print(str(err))
-        pass
-    except:
-        pass
-    assert abif_string != None
-    linecount = abif_string.count('\n')
-    assert linecount > 206
-    assert linecount < 230
-    err = obj._get_error_string()
-    assert err == None
-
-
-def test_larkparser_test012():
-    obj = abif.ABIF_File('testfiles/test012.abif')
-    assert obj.count() == 100
-    abif_string = ""
-    try:
-        abif_string = obj.parse()
-    except lark.exceptions.UnexpectedCharacters as err:
-        print(str(err))
-        pass
-    except:
-        pass
-    assert abif_string != None
-    linecount = abif_string.count('\n')
-    assert linecount < 168
-    assert linecount > 156
-    err = obj._get_error_string()
-    assert err == None
-
-
-def test_larkparser_test013():
-    obj = abif.ABIF_File('testfiles/test013.abif')
-    assert obj.count() == 100
-    abif_string = ""
-    try:
-        abif_string = obj.parse()
-    except lark.exceptions.UnexpectedCharacters as err:
-        print(str(err))
-        pass
-    except:
-        pass
-    assert abif_string != None
-    linecount = abif_string.count('\n')
-    assert linecount >= 170
-    assert linecount <= 180
-    err = obj._get_error_string()
-    assert err == None
-
-
-def test_larkparser_test014():
-    testfile = 'test014.abif'
-    pytest.xfail(f"{testfile}: invalid ABIF")
-    obj = abif.ABIF_File(f"testfiles/{testfile}")
-    assert obj.count() == 100
-    abif_string = ""
-    try:
-        abif_string = obj.parse()
-    except lark.exceptions.UnexpectedCharacters as err:
-        print(str(err))
-        pass
-    except:
-        pass
-    assert abif_string != None
-    linecount = abif_string.count('\n')
-    assert linecount >= 210
-    assert linecount <= 235
-    err = obj._get_error_string()
-    assert err == None
-
-
-def test_larkparser_test015():
-    obj = abif.ABIF_File('testfiles/test015.abif')
-    assert obj.count() == 100
-    abif_string = ""
-    try:
-        abif_string = obj.parse()
-    except lark.exceptions.UnexpectedCharacters as err:
-        print(str(err))
-        pass
-    except:
-        pass
-    assert abif_string != None
-    linecount = abif_string.count('\n')
-    assert linecount > 200
-    assert linecount < 220
-    err = obj._get_error_string()
-    assert err == None
-
-
-def test_larkparser_test016():
-    obj = abif.ABIF_File('testfiles/test016.abif')
-    assert obj.count() == 100
-    abif_string = ""
-    try:
-        abif_string = obj.parse()
-    except lark.exceptions.UnexpectedCharacters as err:
-        print(str(err))
-        pass
-    except:
-        pass
-    assert abif_string != None
-    linecount = abif_string.count('\n')
-    assert linecount > 205
-    assert linecount < 225
-    err = obj._get_error_string()
-    assert err == None
-
-
-def test_larkparser_test017():
-    obj = abif.ABIF_File('testfiles/test017.abif')
-    assert obj.count() == 100
-    abif_string = ""
-    try:
-        abif_string = obj.parse()
-    except lark.exceptions.UnexpectedCharacters as err:
-        print(str(err))
-        pass
-    except:
-        pass
-    assert abif_string != None
-    linecount = abif_string.count('\n')
-    assert linecount > 215
-    assert linecount < 235
-    err = obj._get_error_string()
-    assert err == None
-
-
-def test_larkparser_test018():
-    obj = abif.ABIF_File('testfiles/test018.abif')
-    assert obj.count() == 222230
-    abif_string = ""
-    try:
-        abif_string = obj.parse()
-    except lark.exceptions.UnexpectedCharacters as err:
-        print(str(err))
-        pass
-    except:
-        pass
-    assert abif_string != None
-    linecount = abif_string.count('\n')
-    assert linecount > 290
-    assert linecount < 320
-    err = obj._get_error_string()
-    assert err == None
-
-# test019.abif - Allowing for digits in cand_id (just not at the start)
-def test_larkparser_test019():
-    obj = abif.ABIF_File('testfiles/test019.abif')
-    assert obj.count() == 100
-    abif_string = ""
-    try:
-        abif_string = obj.parse()
-    except lark.exceptions.UnexpectedCharacters as err:
-        print(str(err))
-        pass
-    except:
-        pass
-    assert abif_string != None
-    linecount = abif_string.count('\n')
-    assert linecount >= 210
-    assert linecount <= 235
-    err = obj._get_error_string()
-    assert err == None
-
-
+    if "min_linecount" in test_case:
+        assert linecount >= test_case["min_linecount"]
+    if "max_linecount" in test_case and test_case["max_linecount"] < float('inf'):
+        assert linecount <= test_case["max_linecount"]
+    
+    # Check for Lark errors
+    err = larkobj._get_error_string()
+    if test_case.get("valid", True):
+        assert err == None
+    elif "error_starts_with" in test_case:
+        assert err and err.startswith(test_case["error_starts_with"])
+    
+    # Try to transform and print results
+    parseobj = larkobj.transform()
+    if parseobj and hasattr(parseobj, "children"):
+        print(f"TEST {test_case['id']} transform result:")
+        for i, line in enumerate(parseobj.children[:5]):
+            print(f"LINE {i}: {line}")
+        if len(parseobj.children) > 5:
+            print(f"... ({len(parseobj.children) - 5} more lines)")
