@@ -56,35 +56,35 @@ TEST_CASES = [
         "file": "test005.abif",
         "valid": False,
         "error_starts_with": "No terminal defined",
-        "description": "Declared, bracketed candidate tokens. Unordered scores."
+        "description": "Declared, bracketed candidate tokens. Unordered scores. (NOT VALID)"
     },
     {
         "id": "test006_notvalid",
         "file": "test006.abif",
         "valid": False,
         "error_starts_with": "No terminal defined",
-        "description": "Bracketed candidate tokens (declared). Ranked and scored."
+        "description": "Bracketed candidate tokens (declared). Ranked and scored. (NOT VALID)"
     },
     {
         "id": "test007_notvalid",
         "file": "test007.abif",
         "valid": False,
         "error_starts_with": "No terminal defined",
-        "description": "Declared, bracketed candidate tokens. Ranked, no score."
+        "description": "Declared, bracketed candidate tokens. Ranked, no score. (NOT VALID)"
     },
     {
         "id": "test008_notvalid",
         "file": "test008.abif",
         "valid": False,
         "error_starts_with": "No terminal defined",
-        "description": "Mixed bracketed candidate tokens (sans whitespace)"
+        "description": "Mixed bracketed candidate tokens (sans whitespace). (NOT VALID)"
     },
     {
         "id": "test009_notvalid",
         "file": "test009.abif",
         "valid": False,
         "error_starts_with": "No terminal defined",
-        "description": "Asterisk-delimited multiplier"
+        "description": "Asterisk-delimited multiplier. (NOT VALID)"
     },
     {
         "id": "test010_isvalid",
@@ -189,20 +189,28 @@ def test_abif_file(test_case, request):
     if test_case["file"] == None:
         return
 
-    # XFAIL all of the invalid ABIF files
-    if not test_case.get('valid'):
-        pytest.xfail(f"{test_case['file']}: invalid ABIF")
-
     # Pass ABIF testfile into Lark-based parser
     testfile = test_case["file"]
     larkobj = abif.ABIF_File(f"testfiles/{testfile}")
 
     # Check ballot count
     if "count" in test_case:
-        assert larkobj.count() == test_case["count"]
+        try:
+            larkobj.count()  == test_case["count"]
+        except lark.exceptions.UnexpectedCharacters as e:
+            if not test_case.get('valid'):
+                pytest.xfail(f"{test_case['file']}: invalid ABIF - {e}")
+            else:
+                raise
 
     # Pull parsed ABIF string into a buffer
-    abif_string = larkobj.parse()
+    try:
+        abif_string = larkobj.parse()
+    except lark.exceptions.UnexpectedCharacters as e:
+        if not test_case.get('valid'):
+            pytest.xfail(f"{test_case['file']}: invalid ABIF - {e}")
+        else:
+            raise
 
     # Check linecount against min_linecount and max_linecount
     linecount = abif_string.count('\n')
@@ -226,3 +234,5 @@ def test_abif_file(test_case, request):
             print(f"LINE {i}: {line}")
         if len(parseobj.children) > 5:
             print(f"... ({len(parseobj.children) - 5} more lines)")
+    if not test_case.get('valid'):
+        assert False, f"Test {test_case['id']} was expected to fail (valid=False) but passed"

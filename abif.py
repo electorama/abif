@@ -28,11 +28,11 @@ ABIF_WORKING_TESTS = [
     'testfiles/test011.abif',
     'testfiles/test012.abif',
     'testfiles/test013.abif',
-    'testfiles/test014.abif',
     'testfiles/test015.abif',
     'testfiles/test016.abif',
     'testfiles/test017.abif',
-    'testfiles/test018.abif'
+    'testfiles/test018.abif',
+    'testfiles/test019.abif'
 ]
 
 class ABIF_Parser:
