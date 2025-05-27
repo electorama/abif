@@ -38,121 +38,12 @@ ABIF_WORKING_TESTS = [
     'testfiles/test019.abif'
 ]
 
-
-class ABIF_Parser:
-    """Class for parsing Aggregated Ballot Information Format (ABIF) files
-    """
-
-    def __init__(self):
-        self.parser = self.get_parser()
-        return None
-
-    def get_parser(self):
-        with open(ABIF_GRAMMAR_FILE, "r") as f:
-            self.abif_grammar_bnf = f.read()
-
-        self.abif_parser = Lark(self.abif_grammar_bnf,
-                                parser="earley",
-                                ambiguity="resolve").parse
-
-        return self.abif_parser
-
-
-class ABIF_File(Transformer):
-    """File with ABIF-formatted ballots
-    """
-
-    def __init__(self, filename=None, verbose=False):
-        """ Initialize ABIF class from file """
-        self.ballots = []
-        self.filename = filename
-        self.err = None
-        self.verbose = verbose
-
-        if self.filename == None:
-            raise (BaseException())
-        else:
-            self._load()
-        return None
-
-    def _load(self):
-        """ Load ABIF file into memory """
-
-        i = 0
-        with open(self.filename) as f:
-            for (i, line) in enumerate(f):
-                self.ballots.append(line)
-        return self.filename
-
-    def transform(self):
-        pobj = self.parseobj
-        return super().transform(pobj)
-
-    def count(self):
-        """ Return the number of ballots represented by abif file """
-        # As of 2021-07-19, this ensures that the file parses, and
-        # then does a very crude regexp-based count of the ballot
-        # bundles.
-
-        # Try running lark-based parser
-        self.parse()
-
-        count_retval = 0
-        for (i, line) in enumerate(self.ballots):
-            match = re.search(r'^(\d+)\s*[:\*]', line)
-            if match:
-                thiscount = int(match.group(1))
-                count_retval += thiscount
-        self.ballotqty = count_retval
-
-        return self.ballotqty
-
-    def _read_file(self):
-        afilehandle = open(self.filename, 'r')
-        self.file_as_string = afilehandle.read()
-        afilehandle.close()
-
-    def _get_error_string(self):
-        return self.err
-
-    def parse(self):
-        """ Parse file using Lark parser, returning output as text blob
-        """
-
-        self._read_file()
-
-        lark_parser = abif.ABIF_Parser().get_parser()
-
-        outstr = ""
-        try:
-            self.parseobj = lark_parser(self.file_as_string)
-        except UnexpectedCharacters as err:
-            self.err = str(err)
-            print("ERROR (UnexpectedCharacters): " + self.filename)
-            print(self.err)
-            if self.verbose:
-                print("================")
-                print("FILE: " + self.filename)
-                print("---------------")
-                print(self.file_as_string)
-            raise
-        except:
-            print("ERROR-GACK: " + self.filename)
-            if self.verbose:
-                print(self.file_as_string)
-            raise
-
-        outstr += "================\n"
-        outstr += "FILE: " + self.filename + "\n"
-        outstr += "---------------\n"
-        outstr += self.file_as_string
-        if self.parseobj:
-            outstr += "================\n"
-            outstr += "PARSEOUT:\n"
-            outstr += "---------------\n"
-            outstr += str(self.parseobj.pretty()) + "\n"
-        outstr += "---------------\n"
-        return outstr
+FOOTER = """----------------
+For more detailed analysis, try abiftool or awt (the "abif web tool")
+which can be found at the following locations:
+ * abiftool: https://github.com/electorama/abiftool
+ *      awt: https://abif.electorama.com/
+"""
 
 
 @v_args(inline=True)
@@ -328,17 +219,29 @@ def get_test_filenames(allfiles=False):
     return fnarray
 
 
-def analyze_file(afilename, verbose):
-    obj = abif.ABIF_File(afilename, verbose=verbose)
+def convert_abif_file_to_jabmod(abif_filename):
+    with open(abif_filename, 'r', encoding='utf-8') as f:
+        abif_str = f.read()
 
+    transformer = ABIFtoJabmodTransformer()
+    parser = Lark(ABIF_GRAMMAR_STR, parser="lalr", transformer=transformer)
+    parser.parse(abif_str)
+    return transformer.get_jabmod()
+
+
+def analyze_file(abif_filename, verbose):
+    jabmod = convert_abif_file_to_jabmod(abif_filename)
+
+    outstr = ""
     if verbose:
-        outstr = obj.parse()
+        outstr += f"====================================================================\n"
+        outstr += f"Analysis for {abif_filename}:\n"
+        outstr += f" Ballot count: {jabmod['metadata']['ballotcount']}\n"
+        outstr += f" Candidates:\n"
+        for candkey, candval in jabmod['candidates'].items():
+            outstr += f" * {candkey}: {candval}\n"
     else:
-        outstr = ""
-
-    outstr += obj.filename + " -- Count: "
-    outstr += str(obj.count())
-
+        outstr += f"{abif_filename} ballot count: {jabmod['metadata']['ballotcount']}\n"
     return outstr
 
 
@@ -367,16 +270,12 @@ def main():
 
     for filename in fnarray:
         if args.jabmod:
-            transformer = ABIFtoJabmodTransformer()
-            with open(filename, 'r', encoding='utf-8') as f:
-                abif_str = f.read()
-
-            parser = Lark(ABIF_GRAMMAR_STR, parser="lalr", transformer=transformer)
-            parser.parse(abif_str)
-            jabmod = transformer.get_jabmod()
+            jabmod = convert_abif_file_to_jabmod(filename)
             print(json.dumps(jabmod, indent=4))
         else:
-            print(analyze_file(filename, args.verbose))
+            print(analyze_file(filename, args.verbose), end="")
+    if args.verbose:
+        print(FOOTER)
 
 
 if __name__ == "__main__":
