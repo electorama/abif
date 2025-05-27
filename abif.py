@@ -189,6 +189,9 @@ def main():
 
     parser.add_argument('--all-tests', help='get all tests from testfiles dir',
                         action="store_true")
+    parser.add_argument('-j', '--jabmod',
+                        help='print JSON ABIF model (jabmod) for given ABIF',
+                        action="store_true")
     parser.add_argument('-v', '--verbose',
                         help='print long output',
                         action="store_true")

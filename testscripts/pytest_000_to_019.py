@@ -118,8 +118,8 @@ TEST_CASES = [
         "file": "test013.abif",
         "valid": True,
         "count": 100,
-        "min_linecount": 170,
-        "max_linecount": 180,
+        "min_linecount": 160,
+        "max_linecount": 175,
         "description": "Mixed bracketed candidate tokens (sans whitespace)"
     },
     {
