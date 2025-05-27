@@ -12,8 +12,8 @@ import abif
 TEST_CASES = [
     {
         "id": "test000_empty",
-        "file": None,  # No file, just testing parser initialization
-        "description": "Testing whether ABIF parser loads"
+        "file": None,
+        "description": "Testing parser initialization"
     },
     {
         "id": "test001_isvalid",
@@ -129,7 +129,7 @@ TEST_CASES = [
         "count": 100,
         "min_linecount": 210,
         "max_linecount": 235,
-        "description": "Asterisk-delimited multiplier"
+        "description": "Asterisk-delimited multiplier (NOT VALID)"
     },
     {
         "id": "test015_isvalid",

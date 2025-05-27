@@ -8,6 +8,7 @@ concisely expressing the results of an ranked or rated election.
 
 import abif
 import argparse
+import json
 import os
 import re
 
@@ -15,9 +16,11 @@ from lark import Lark, Transformer, v_args
 
 from lark.exceptions import UnexpectedToken, UnexpectedCharacters
 
-ABIF_DIR = os.path.dirname(__file__)
-
+ABIF_DIR = os.path.dirname(os.path.realpath(__file__, strict=True))
 ABIF_GRAMMAR_FILE = os.path.join(ABIF_DIR, 'abif.ebnf')
+
+with open(ABIF_GRAMMAR_FILE, 'r', encoding='utf-8') as f:
+    ABIF_GRAMMAR_STR = f.read()
 
 ABIF_WORKING_TESTS = [
     'testfiles/test001.abif',
@@ -35,6 +38,7 @@ ABIF_WORKING_TESTS = [
     'testfiles/test019.abif'
 ]
 
+
 class ABIF_Parser:
     """Class for parsing Aggregated Ballot Information Format (ABIF) files
     """
@@ -48,8 +52,8 @@ class ABIF_Parser:
             self.abif_grammar_bnf = f.read()
 
         self.abif_parser = Lark(self.abif_grammar_bnf,
-            parser="earley",
-            ambiguity="resolve").parse
+                                parser="earley",
+                                ambiguity="resolve").parse
 
         return self.abif_parser
 
@@ -66,7 +70,7 @@ class ABIF_File(Transformer):
         self.verbose = verbose
 
         if self.filename == None:
-            raise(BaseException())
+            raise (BaseException())
         else:
             self._load()
         return None
@@ -126,7 +130,7 @@ class ABIF_File(Transformer):
             self.err = str(err)
             print("ERROR (UnexpectedCharacters): " + self.filename)
             print(self.err)
-            if(self.verbose):
+            if self.verbose:
                 print("================")
                 print("FILE: " + self.filename)
                 print("---------------")
@@ -134,7 +138,7 @@ class ABIF_File(Transformer):
             raise
         except:
             print("ERROR-GACK: " + self.filename)
-            if(self.verbose):
+            if self.verbose:
                 print(self.file_as_string)
             raise
 
@@ -142,13 +146,169 @@ class ABIF_File(Transformer):
         outstr += "FILE: " + self.filename + "\n"
         outstr += "---------------\n"
         outstr += self.file_as_string
-        if(self.parseobj):
+        if self.parseobj:
             outstr += "================\n"
             outstr += "PARSEOUT:\n"
             outstr += "---------------\n"
             outstr += str(self.parseobj.pretty()) + "\n"
         outstr += "---------------\n"
         return outstr
+
+
+@v_args(inline=True)
+class ABIFtoJabmodTransformer(Transformer):
+    def __init__(self):
+        super().__init__()
+        self.ballotcount = 0
+        self.votelines = []
+        self.candidates = {}
+        self.metadata = {}
+
+    def comment_string(self, token):
+        return str(token)
+
+    def comment(self, *args):
+        for arg in args:
+            if isinstance(arg, str) and arg != '#':
+                return ("comment", str(arg))
+        return ("comment", "")
+
+    def ballot_count(self, token):
+        count = int(token)
+        self.ballotcount += count
+        return count
+
+    def json_pair(self, key, _, value):
+        k = str(key).strip('"')
+        v = str(value).strip('"')
+        return (k, int(v) if v.isdigit() else v)
+
+    def json_line(self, *items):
+        for item in items:
+            if isinstance(item, tuple) and len(item) == 2:
+                if item[0] != "comment":
+                    self.metadata.update(dict([item]))
+        return None
+
+    def cand_key(self, token):
+        return str(token)
+
+    def cand_square_quoted(self, *tokens):
+        # Parse content between brackets
+        content = ""
+        for token in tokens:
+            if str(token) not in ('[', ']'):
+                content += str(token)
+        return content
+
+    def cand_line(self, *items):
+        # Extract candidate ID and name
+        if len(items) >= 3 and str(items[0]) == '=':
+            id_token = items[1]
+            content_index = 3
+        else:
+            id_token = items[0]
+            content_index = 2
+
+        if content_index < len(items):
+            name_token = items[content_index]
+            cand_id = str(id_token)
+            name = str(name_token)
+
+            # Clean up name if it's in square brackets
+            if '[' in name and ']' in name:
+                name = name.strip('[]')
+
+            self.candidates[cand_id] = name
+        return None
+
+    def cand_id(self, token):
+        return str(token)
+
+    def cand_tok_rating(self, cand_id, _, rating):
+        return {"candidate": str(cand_id), "rating": int(rating)}
+
+    def cand_voter_pref(self, pref):
+        if isinstance(pref, dict):
+            return pref
+        return {"candidate": str(pref), "rating": None}
+
+    def cand_sep(self, sep):
+        return str(sep)
+
+    def count_sep(self, *_):
+        return ":"
+
+    def cand_element_list(self, *items):
+        prefs = []
+        separators = []
+
+        for item in items:
+            if isinstance(item, dict):
+                prefs.append(item)
+            elif item in ['>', '=', ',']:
+                separators.append(item)
+
+        return {"prefs": prefs, "separators": separators}
+
+    def cands_and_seps(self, elements):
+        return elements
+
+    def voteline(self, count, _, elements, *comment_parts):
+        preferences = elements["prefs"]
+        separators = elements["separators"]
+
+        # Build the preference string
+        prefstr_parts = []
+
+        # Extract the comment if present
+        comment = None
+        for part in comment_parts:
+            if isinstance(part, tuple) and part[0] == "comment":
+                comment = part[1]
+
+        # Build prefs structure for jabmod
+        prefs = {}
+        for i, pref in enumerate(preferences):
+            candidate = pref["candidate"]
+            rating = pref["rating"]
+
+            pref_data = {
+                "rating": rating,
+                "rank": i + 1
+            }
+
+            # Add delimiter if not the last preference
+            if i < len(separators):
+                pref_data["nextdelim"] = separators[i]
+                prefstr_parts.append(
+                    f"{candidate}/{rating}{separators[i]}" if rating is not None else f"{candidate}{separators[i]}")
+            else:
+                prefstr_parts.append(
+                    f"{candidate}/{rating}" if rating is not None else candidate)
+
+            prefs[candidate] = pref_data
+
+        # Build the prefstr
+        prefstr = "".join(prefstr_parts)
+
+        voteline = {
+            "qty": count,
+            "comment": comment,
+            "prefs": prefs,
+            "prefstr": prefstr
+        }
+
+        self.votelines.append(voteline)
+        return None
+
+    def get_jabmod(self):
+        """Return the complete jabmod structure."""
+        return {
+            "candidates": self.candidates,
+            "metadata": {**self.metadata, "ballotcount": self.ballotcount},
+            "votelines": sorted(self.votelines, key=lambda x: x["qty"], reverse=True)
+        }
 
 
 def get_test_filenames(allfiles=False):
@@ -171,7 +331,7 @@ def get_test_filenames(allfiles=False):
 def analyze_file(afilename, verbose):
     obj = abif.ABIF_File(afilename, verbose=verbose)
 
-    if(verbose):
+    if verbose:
         outstr = obj.parse()
     else:
         outstr = ""
@@ -199,17 +359,26 @@ def main():
                         nargs='*', default=None)
     args = parser.parse_args()
 
-    if(args.files):
+    if (args.files):
         fnarray = args.files
     else:
         parser.print_usage()
         fnarray = get_test_filenames(args.all_tests)
 
     for filename in fnarray:
-        print(analyze_file(filename, args.verbose))
+        if args.jabmod:
+            transformer = ABIFtoJabmodTransformer()
+            with open(filename, 'r', encoding='utf-8') as f:
+                abif_str = f.read()
+
+            parser = Lark(ABIF_GRAMMAR_STR, parser="lalr", transformer=transformer)
+            parser.parse(abif_str)
+            jabmod = transformer.get_jabmod()
+            print(json.dumps(jabmod, indent=4))
+        else:
+            print(analyze_file(filename, args.verbose))
 
 
 if __name__ == "__main__":
     # execute only if run as a script
     main()
-
