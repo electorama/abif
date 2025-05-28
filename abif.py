@@ -82,7 +82,7 @@ class ABIFtoJabmodTransformer(Transformer):
         return None
 
     def cand_key(self, token):
-        return str(token)
+        return str(token).strip('"')
 
     def cand_square_quoted(self, *tokens):
         # Parse content between brackets
@@ -91,6 +91,9 @@ class ABIFtoJabmodTransformer(Transformer):
             if str(token) not in ('[', ']'):
                 content += str(token)
         return content
+
+    def cand_id_sep(self, colon):
+        return colon
 
     def cand_line(self, *items):
         # Extract candidate ID and name
@@ -114,40 +117,57 @@ class ABIFtoJabmodTransformer(Transformer):
         return None
 
     def cand_id(self, token):
-        return str(token)
+        # Always return a dictionary to be consistent with cand_tok_rating
+        return {"candidate": str(token), "rating": None}
 
     def cand_tok_rating(self, cand_id, _, rating):
-        return {"candidate": str(cand_id), "rating": int(rating)}
+        # Make sure cand_id is properly handled whether it's a string or dict
+        candidate = cand_id["candidate"] if isinstance(cand_id, dict) else str(cand_id)
+        return {"candidate": candidate, "rating": int(rating)}
 
-    def cand_voter_pref(self, pref):
-        if isinstance(pref, dict):
-            return pref
-        return {"candidate": str(pref), "rating": None}
+    # This method ensures preference items are always dictionaries
+    def pref_item(self, item):
+        if isinstance(item, dict) and "candidate" in item:
+            return item
+        elif isinstance(item, str):
+            return {"candidate": item, "rating": None}
+        return item
 
-    def cand_sep(self, sep):
+    def pref_sep(self, sep):
         return str(sep)
 
-    def count_sep(self, *_):
+    def eq(self, *args):
+        return "="
+
+    def gt(self, *args):
+        return ">"
+
+    def comma(self, *args):
+        return ","
+
+    def count_sep(self, *args):
         return ":"
 
-    def cand_element_list(self, *items):
-        prefs = []
+    def prefs(self, first_item, *args):
+        prefs = [first_item]
         separators = []
 
-        for item in items:
-            if isinstance(item, dict):
-                prefs.append(item)
-            elif item in ['>', '=', ',']:
-                separators.append(item)
+        for i, arg in enumerate(args):
+            if isinstance(arg, str) and arg in ['>', '=', ',']:
+                separators.append(arg)
+            elif isinstance(arg, dict) and "candidate" in arg:
+                prefs.append(arg)
 
         return {"prefs": prefs, "separators": separators}
 
-    def cands_and_seps(self, elements):
-        return elements
+    def voteline(self, count, _, elements=None, *comment_parts):
+        # Handle case of blank ballots
+        preferences = []
+        separators = []
 
-    def voteline(self, count, _, elements, *comment_parts):
-        preferences = elements["prefs"]
-        separators = elements["separators"]
+        if elements:
+            preferences = elements.get("prefs", [])
+            separators = elements.get("separators", [])
 
         # Build the preference string
         prefstr_parts = []
@@ -197,7 +217,7 @@ class ABIFtoJabmodTransformer(Transformer):
         """Return the complete jabmod structure."""
         return {
             "candidates": self.candidates,
-            "metadata": {**self.metadata, "ballotcount": self.ballotcount},
+            "metadata": {"ballotcount": self.ballotcount, **self.metadata},
             "votelines": sorted(self.votelines, key=lambda x: x["qty"], reverse=True)
         }
 

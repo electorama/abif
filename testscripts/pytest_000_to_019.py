@@ -175,6 +175,15 @@ TEST_CASES = [
         "min_linecount": 210,
         "max_linecount": 235,
         "description": "Allowing for digits in cand_id (just not at the start)"
+    },
+    {
+        "id": "test020_isvalid",
+        "file": "test020.abif",
+        "valid": True,
+        "ballotcount": 100,
+        "min_linecount": 210,
+        "max_linecount": 235,
+        "description": "Test for blank prefline (corresponding to blank ballots)"
     }
 ]
 

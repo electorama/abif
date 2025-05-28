@@ -1,0 +1,14 @@
+# Case 20 - Blank prefs
+#
+# Test for blank prefline (corresponding to blank ballots)
+=c001:[Doña García Márquez]
+=c002:[Steven B. Jensen]
+=c003:[Sue Ye (蘇業)]
+=c004:[Adam Muñoz]
+
+10:
+17: c001>c002>c003
+26: c002>c001>c003>c004
+24: c003>c001>c004>c002
+23: c004>c003>c001>c002
+
