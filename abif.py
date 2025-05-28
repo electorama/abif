@@ -69,10 +69,21 @@ class ABIFtoJabmodTransformer(Transformer):
         self.ballotcount += count
         return count
 
+
     def json_pair(self, key, _, value):
-        k = str(key).strip('"')
-        v = str(value).strip('"')
-        return (k, int(v) if v.isdigit() else v)
+        retkey = str(key).strip('"')
+
+        orig_string = str(value)
+        if orig_string.startswith('"'):
+            # Keep this as a string, but strip the quotation marks
+            retval = orig_string.strip('"')
+        elif orig_string.isdigit():
+            retval = int(orig_string)
+        else:
+            # we really shouldn't get here
+            raise
+        return (retkey, retval)
+
 
     def json_line(self, *items):
         for item in items:
@@ -184,10 +195,10 @@ class ABIFtoJabmodTransformer(Transformer):
             candidate = pref["candidate"]
             rating = pref["rating"]
 
-            pref_data = {
-                "rating": rating,
-                "rank": i + 1
-            }
+            pref_data = {}
+            pref_data["rank"] = i + 1
+            if rating:
+                pref_data["rating"] = rating
 
             # Add delimiter if not the last preference
             if i < len(separators):
