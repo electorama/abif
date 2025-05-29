@@ -1,13 +1,10 @@
 #!/usr/bin/python
+import abif
 import lark
 import os
 import pytest
 import sys
 
-# Adding parent dir to PYTHONPATH:
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-import abif
 
 TEST_CASES = [
     {
@@ -184,6 +181,15 @@ TEST_CASES = [
         "min_linecount": 210,
         "max_linecount": 235,
         "description": "Test for blank prefline (corresponding to blank ballots)"
+    },
+    {
+        "id": "test021_isvalid",
+        "file": "test021.abif",
+        "valid": True,
+        "ballotcount": 100,
+        "min_linecount": 210,
+        "max_linecount": 235,
+        "description": "Metadata tests"
     }
 ]
 

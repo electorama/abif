@@ -2,6 +2,7 @@
 %import common.NEWLINE
 %import common.ESCAPED_STRING
 %import common.INT -> INTEGER
+%import common.SIGNED_FLOAT -> FLOAT
 %ignore WS
 
 ASTERISK : "*"
@@ -10,47 +11,51 @@ OPENSQ : "["
 CLOSEDSQ : "]"
 CLOSEDCURLY : "}"
 COLON : ":"
+COMMA : ","
 HASHMARK : "#"
 OPENCURLY : "{"
 SLASH : "/"
+GT : ">"
+TRUE : "true"
+FALSE : "false"
+NULL : "null"
 
 // QKEY is a quoted key.
 QKEY : ESCAPED_STRING
 // BKEY is a bare candidate key.
-BKEY : /[a-zA-Z][a-zA-Z0-9_]*/
+BKEY : /[a-zA-Z][a-zA-Z0-9_-]*/
 // QVALUE is a quoted value.
 QVALUE : ESCAPED_STRING
 
 ?start: abiffile
-?abiffile : ( comment | json_line | cand_line | voteline )*
+?abiffile : ( comment | metadata_line | cand_line | voteline )*
 
 // comment definition
 comment : HASHMARK comment_string NEWLINE
 comment_string : /[^\r\n]+/
 
-// json_line - metadata lines
-// NOTE: This is a subset of JSON that only allows for a single key/value pair.
-json_line : OPENCURLY [json_pair] CLOSEDCURLY comment?
-json_pair : (QKEY | BKEY) COLON ( QVALUE | QKEY | INTEGER )
-json_key: ( QKEY | BKEY )
+// NOTE: metadata lines look more-or-less like JSON or JSON5 but there
+// are important differences that are left as an exercise for the
+// reader:
+metadata_line : OPENCURLY [metadata_pair] CLOSEDCURLY comment?
+metadata_pair : metadata_key COLON metadata_value
+metadata_key  : QKEY | BKEY
+metadata_value: QVALUE | INTEGER | FLOAT | TRUE | FALSE | NULL
 
 // cand_line - candidate definition lines
-cand_line : EQUAL? cand_key cand_id_sep ( cand_square_quoted | cand_key ) comment?
+cand_line : EQUAL? cand_tok COLON cand_tok comment?
 cand_square_quoted : OPENSQ /[^\]]+/ CLOSEDSQ
-cand_id_sep : COLON
+cand_tok:  ( cand_square_quoted | cand_key )
 cand_key: ( QKEY | BKEY )
 
 // voteline - voter preference lines
 voteline : ballot_count count_sep prefs? comment?
 ballot_count : INTEGER
 prefs : pref_item (pref_sep pref_item)*
-pref_sep : ( eq | gt | comma )
+pref_sep : ( EQUAL | GT | COMMA )
 
 // pref_item - candidate token and optional candidate rating
 pref_item : ( cand_id | cand_tok_rating )
 cand_tok_rating : cand_id SLASH INTEGER
 cand_id : ( cand_key | cand_square_quoted )
-eq : "="
-gt : ">"
-comma : ","
 count_sep : COLON

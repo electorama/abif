@@ -1,0 +1,23 @@
+# Case 21 - Metadata tests
+
+{version: "0.1"}
+{description: "Weird election"}
+{display_ballots: true}
+{ballot_type: null}
+{max_rating: 6}
+{count_subpage_ballots: false}
+{count_inline_ballots: true}
+{election_methods: "copeland, plurality"}
+{inline_ballot_type: "range-array"}
+{average_prefs_per_ballot: 3.43}
+
+=c001:[Doña García Márquez]
+=c002:[Steven B. Jensen]
+=c003:[Sue Ye (蘇業)]
+=c004:[Adam Muñoz]
+
+10:
+17: c001>c002>c003
+26: c002>c001>c003>c004
+24: c003>c001>c004>c002
+23: c004>c003>c001>c002

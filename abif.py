@@ -69,27 +69,41 @@ class ABIFtoJabmodTransformer(Transformer):
         self.ballotcount += count
         return count
 
-
-    def json_pair(self, key, _, value):
+    def metadata_pair(self, key, colon, value):
         retkey = str(key).strip('"')
-
-        orig_string = str(value)
-        if orig_string.startswith('"'):
-            # Keep this as a string, but strip the quotation marks
-            retval = orig_string.strip('"')
-        elif orig_string.isdigit():
-            retval = int(orig_string)
-        else:
-            # we really shouldn't get here
-            raise
+        retval = value
         return (retkey, retval)
 
+    def metadata_key(self, key):
+        return key
 
-    def json_line(self, *items):
+    def metadata_value(self, value):
+        if isinstance(value, str):
+            if value == "true":
+                retval = True
+            elif value == "false":
+                retval = False
+            elif value == "null":
+                retval = None
+            elif value.startswith('"') and value.endswith('"'):
+                # Strip quotes but keep as a string
+                retval = value[1:-1]
+            elif re.fullmatch(r'-?\d+', value):
+                return int(value)
+            # regex for simple decimal/floating-point number
+            elif re.fullmatch(r'-?\d+\.\d+', value):
+                return float(value)
+            else:
+                retval = int(value)
+
+        return value
+
+    def metadata_line(self, *items):
         for item in items:
             if isinstance(item, tuple) and len(item) == 2:
-                if item[0] != "comment":
-                    self.metadata.update(dict([item]))
+                key, value = item
+                if key != "comment":
+                    self.metadata[key] = value
         return None
 
     def cand_key(self, token):
