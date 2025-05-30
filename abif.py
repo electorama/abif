@@ -202,20 +202,28 @@ class ABIFtoJabmodTransformer(Transformer):
 
         # Build prefs structure for jabmod
         prefs = {}
+        current_rank = 1  # Track the current rank
+
         for i, pref in enumerate(preferences):
             candidate = pref["candidate"]
             rating = pref["rating"]
 
             pref_data = {}
-            pref_data["rank"] = i + 1
+            pref_data["rank"] = current_rank  # Use tracked rank instead of index
             if rating:
                 pref_data["rating"] = rating
 
             # Add delimiter if not the last preference
             if i < len(separators):
-                pref_data["nextdelim"] = separators[i]
+                delimiter = separators[i]
+                pref_data["nextdelim"] = delimiter
+
+                # Only increment rank on ">" delimiter, not on "=" delimiter
+                if delimiter == ">":
+                    current_rank += 1
+
                 prefstr_parts.append(
-                    f"{candidate}/{rating}{separators[i]}" if rating is not None else f"{candidate}{separators[i]}")
+                    f"{candidate}/{rating}{delimiter}" if rating is not None else f"{candidate}{delimiter}")
             else:
                 prefstr_parts.append(
                     f"{candidate}/{rating}" if rating is not None else candidate)
