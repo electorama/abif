@@ -237,6 +237,19 @@ class ABIFtoJabmodTransformer(Transformer):
 
     def get_jabmod(self):
         """Return the complete jabmod structure."""
+
+        # Find all unique candidate IDs used in votelines
+        voteline_candidates = set()
+        for voteline in self.votelines:
+            for candidate in voteline.get('prefs', {}).keys():
+                voteline_candidates.add(candidate)
+
+        # Add any candidates found in votelines but not explicitly defined
+        for candidate_id in voteline_candidates:
+            if candidate_id not in self.candidates:
+                # Use the ID as both the key and the name when no explicit definition exists
+                self.candidates[candidate_id] = candidate_id
+
         return {
             "candidates": self.candidates,
             "metadata": {"ballotcount": self.ballotcount, **self.metadata},
