@@ -109,13 +109,11 @@ class ABIFtoJabmodTransformer(Transformer):
     def cand_key(self, token):
         return str(token).strip('"')
 
-    def cand_square_quoted(self, *tokens):
-        # Parse content between brackets
-        content = ""
-        for token in tokens:
-            if str(token) not in ('[', ']'):
-                content += str(token)
-        return content
+    def cand_square_quoted(self, open_bracket, content, close_bracket):
+        return str(content)
+
+    def cand_tok(self, item):
+        return item
 
     def cand_id_sep(self, colon):
         return colon
@@ -132,11 +130,10 @@ class ABIFtoJabmodTransformer(Transformer):
         if content_index < len(items):
             name_token = items[content_index]
             cand_id = str(id_token)
-            name = str(name_token)
 
-            # Clean up name if it's in square brackets
-            if '[' in name and ']' in name:
-                name = name.strip('[]')
+            # Process name from the token
+            # If already processed by cand_square_quoted, it will be a string
+            name = str(name_token)
 
             self.candidates[cand_id] = name
         return None
