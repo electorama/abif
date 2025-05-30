@@ -92,11 +92,11 @@ class ABIFtoJabmodTransformer(Transformer):
                 return int(value)
             # regex for simple decimal/floating-point number
             elif re.fullmatch(r'-?\d+\.\d+', value):
-                return float(value)
+                retval = float(value)
             else:
-                retval = int(value)
+                retval = value
 
-        return value
+        return retval
 
     def metadata_line(self, *items):
         for item in items:
