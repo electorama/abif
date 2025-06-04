@@ -106,8 +106,13 @@ class ABIFtoJabmodTransformer(Transformer):
                     self.metadata[key] = value
         return None
 
-    def cand_key(self, token):
-        return str(token).strip('"')
+    def cand_bare(self, token):
+        # Handle bare (unquoted) candidate keys
+        return str(token)
+
+    def cand_doublequote_quoted(self, token):
+        # Handle double-quoted candidate keys
+        return str(token).strip('"')  # Remove quotes
 
     def cand_square_quoted(self, open_bracket, content, close_bracket):
         return str(content)

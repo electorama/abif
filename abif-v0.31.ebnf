@@ -26,6 +26,8 @@ QKEY : ESCAPED_STRING
 BKEY : /[a-zA-Z][a-zA-Z0-9_-]*/
 // QVALUE is a quoted value.
 QVALUE : ESCAPED_STRING
+// Content inside square brackets
+SQ_CONTENT : /[^\]]+/
 
 ?start: abiffile
 ?abiffile : ( comment | metadata_line | cand_line | voteline )*
@@ -34,6 +36,7 @@ QVALUE : ESCAPED_STRING
 comment : HASHMARK comment_string NEWLINE
 comment_string : /[^\r\n]+/
 
+// metadata_line - metadata lines usually at the top of a file
 // NOTE: metadata lines look more-or-less like JSON or JSON5 but there
 // are important differences that are left as an exercise for the
 // reader:
@@ -44,9 +47,10 @@ metadata_value: QVALUE | INTEGER | FLOAT | TRUE | FALSE | NULL
 
 // cand_line - candidate definition lines
 cand_line : EQUAL? cand_tok COLON cand_tok comment?
-cand_square_quoted : OPENSQ /[^\]]+/ CLOSEDSQ
-cand_tok:  ( cand_square_quoted | cand_key )
-cand_key: ( QKEY | BKEY )
+cand_tok: ( cand_square_quoted | cand_doublequote_quoted | cand_bare )
+cand_square_quoted : OPENSQ SQ_CONTENT CLOSEDSQ
+cand_doublequote_quoted : QKEY
+cand_bare : BKEY
 
 // voteline - voter preference lines
 voteline : ballot_count count_sep prefs? comment?
@@ -57,5 +61,5 @@ pref_sep : ( EQUAL | GT | COMMA )
 // pref_item - candidate token and optional candidate rating
 pref_item : ( cand_id | cand_tok_rating )
 cand_tok_rating : cand_id SLASH INTEGER
-cand_id : ( cand_key | cand_square_quoted )
+cand_id : ( cand_bare | cand_doublequote_quoted | cand_square_quoted )
 count_sep : COLON
