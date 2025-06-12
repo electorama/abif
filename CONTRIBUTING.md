@@ -1,8 +1,20 @@
-Please contribute!  But make sure you agree to the licence (both [for the software](https://www.apache.org/licenses/LICENSE-2.0.html) and [for the specification](https://creativecommons.org/licenses/by-sa/4.0/)).  Links to both can be found here:
+Please contribute!  There is still a lot of work that needs to happen to make the ABIF specification ready to submit to an organization that deals with technical specifications.  A list of items that need to be done can be found here:
+* FIXME-link-to-bug-tracker
+
+It was only in 2025 that Lark-based parser became useful for converting ABIF into "jabmod" (the JSON ABif MODel).  It's not perfect, but it may one day replace the regex-based monstrosity that powers [abiftool](https://electorama.com/abiftool) and [awt](https://electorama.com/awt).  See [issue FIXME in the abiftool bug tracker](FIXME) to learn more about that.
+
+The "election-software" mailing list is a good place to stay up-to-date on the latest news associated with ABIF:
+* https://electorama.com/es
+
+If you contribute, please make sure you agree to the licence (both [for the software](https://www.apache.org/licenses/LICENSE-2.0.html) and [for the specification](https://creativecommons.org/licenses/by-sa/4.0/)).  Links to both can be found here:
 * https://github.com/electorama/abif/blob/main/LICENSE
 
-### Changelog/Notes
-Below is a reverse-chronological log of changes to this policy.
+### Policy Changelog
+Below is a reverse-chronological log of changes to the ABIF contribution policy.
+
+#### 2025-06-12
+
+Added many links above.
 
 #### 2022-01-23
 
